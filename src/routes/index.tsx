@@ -28,6 +28,17 @@ type Screen = "start" | "play" | "end";
 const TOTAL_LIVES = 3;
 const POINTS = 10;
 
+function sampleQuestions(count: number) {
+  const pool = [...QUESTIONS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = pool[i];
+    pool[i] = pool[j];
+    pool[j] = tmp;
+  }
+  return pool.slice(0, Math.min(count, pool.length));
+}
+
 function Game() {
   const [screen, setScreen] = useState<Screen>("start");
   const [level, setLevel] = useState(0);
@@ -35,9 +46,10 @@ function Game() {
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
+  const [deck, setDeck] = useState<(typeof QUESTIONS)[number][]>([]);
 
-  const total = QUESTIONS.length;
-  const q = QUESTIONS[level];
+  const total = deck.length;
+  const q = deck[level];
 
   const reset = () => {
     setLevel(0);
@@ -45,6 +57,8 @@ function Game() {
     setScore(0);
     setSelected(null);
     setRevealed(false);
+    const sample = sampleQuestions(5);
+    setDeck(sample);
   };
 
   const start = () => {
@@ -66,8 +80,9 @@ function Game() {
 
   const next = () => {
     const wasCorrect = selected === q.answer;
+    const newLives = wasCorrect ? lives : lives - 1;
     const lastLevel = level + 1 >= total;
-    const dead = !wasCorrect && lives <= 0;
+    const dead = !wasCorrect && newLives <= 0;
 
     if (lastLevel || dead) {
       setScreen("end");
@@ -84,19 +99,22 @@ function Game() {
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {screen === "start" && <StartScreen onStart={start} />}
-        {screen === "play" && (
-          <PlayScreen
-            level={level}
-            total={total}
-            lives={lives}
-            score={score}
-            question={q}
-            selected={selected}
-            revealed={revealed}
-            onChoose={choose}
-            onNext={next}
-          />
-        )}
+        {screen === "play" &&
+          (deck.length > 0 ? (
+            <PlayScreen
+              level={level}
+              total={total}
+              lives={lives}
+              score={score}
+              question={q}
+              selected={selected}
+              revealed={revealed}
+              onChoose={choose}
+              onNext={next}
+            />
+          ) : (
+            <div className="p-6">Cargando preguntas...</div>
+          ))}
         {screen === "end" && (
           <EndScreen score={score} won={won} total={total} onRestart={start} />
         )}
