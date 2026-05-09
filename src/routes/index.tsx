@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Heart, Trophy, RotateCcw, Play, CheckCircle2, XCircle, ArrowRight, Code2 } from "lucide-react";
 import { QUESTIONS } from "@/lib/questions";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,7 @@ function Game() {
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [deck, setDeck] = useState<(typeof QUESTIONS)[number][]>([]);
+  const prevLivesRef = useRef<number | null>(null);
 
   const total = deck.length;
   const q = deck[level];
@@ -74,13 +75,26 @@ function Game() {
       setScore((s) => s + POINTS);
     } else {
       setScore((s) => Math.max(0, s - POINTS));
+      prevLivesRef.current = lives;
       setLives((l) => l - 1);
     }
   };
 
   const next = () => {
     const wasCorrect = selected === q.answer;
-    const newLives = wasCorrect ? lives : lives - 1;
+    let newLives = lives;
+    if (!wasCorrect && prevLivesRef.current != null) {
+      const prev = prevLivesRef.current;
+      if (lives === prev - 1) {
+        newLives = lives; // decrement already applied
+      } else {
+        newLives = Math.max(0, prev - 1); // decrement not applied yet
+      }
+      prevLivesRef.current = null;
+    } else if (!wasCorrect) {
+      newLives = lives; // fallback
+    }
+
     const lastLevel = level + 1 >= total;
     const dead = !wasCorrect && newLives <= 0;
 
