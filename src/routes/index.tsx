@@ -8,13 +8,13 @@ import { Progress } from "@/components/ui/progress";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CodeQuest — Mini juego de programación" },
+      { title: "Codigo congelado — Mini juego de programación" },
       {
         name: "description",
         content:
           "Mini juego educativo para repasar variables, condicionales, ciclos y funciones. 5 niveles, 3 vidas, ¡a programar!",
       },
-      { property: "og:title", content: "CodeQuest — Mini juego de programación" },
+      { property: "og:title", content: "Codigo congelado — Mini juego de programación" },
       {
         property: "og:description",
         content: "Repasa variables, condicionales, ciclos y funciones jugando.",
@@ -66,9 +66,8 @@ function Game() {
 
   const next = () => {
     const wasCorrect = selected === q.answer;
-    const newLives = wasCorrect ? lives : lives; // already updated
     const lastLevel = level + 1 >= total;
-    const dead = !wasCorrect && lives - 1 <= 0;
+    const dead = !wasCorrect && lives <= 0;
 
     if (lastLevel || dead) {
       setScreen("end");
@@ -115,7 +114,7 @@ function StartScreen({ onStart }: { onStart: () => void }) {
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur mb-6">
         <Code2 className="w-8 h-8 text-white" />
       </div>
-      <h1 className="text-5xl font-bold text-white mb-3">CodeQuest</h1>
+      <h1 className="text-5xl font-bold text-white mb-3">Codigo congelado</h1>
       <p className="text-white/90 text-lg mb-2">Mini juego de programación</p>
       <p className="text-white/80 max-w-md mx-auto mb-8">
         Pon a prueba tus conocimientos de <strong>variables</strong>,{" "}
